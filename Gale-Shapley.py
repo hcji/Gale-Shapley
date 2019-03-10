@@ -9,19 +9,30 @@ import random
 import pandas as pd
 
 
-def create_sample(man_num, women_num):
+def create_sample(man_num, women_num, diaosi = True):
     #设置男女生喜好样本
-    man = pd.DataFrame( [['w'+str(i) for i in random.sample(range(1,women_num+1),women_num)] \
-                          for i in range(man_num)],
-                        index = ['m'+str(i) for i in range(1,man_num+1)],
-                        columns = ['level'+str(i) for i in range(1,women_num+1)]
-                        )
+    if diaosi:
+        women_num += 1
+        man = pd.DataFrame( [['w'+str(i) for i in random.sample(range(1,women_num+1),women_num)] \
+                              for i in range(man_num+1)],
+                            index = ['m'+str(i) for i in range(1,man_num+2)],
+                            columns = ['level'+str(i) for i in range(1,women_num+1)]
+                            )
+    else:
+        man = pd.DataFrame( [['w'+str(i) for i in random.sample(range(1,women_num+1),women_num)] \
+                              for i in range(man_num)],
+                            index = ['m'+str(i) for i in range(1,man_num+1)],
+                            columns = ['level'+str(i) for i in range(1,women_num+1)]
+                            )
 
     women = pd.DataFrame( [['m'+str(i) for i in random.sample(range(1,man_num+1),man_num)] \
                           for i in range(women_num)],
                         index = ['w'+str(i) for i in range(1,women_num+1)],
                         columns = ['level'+str(i) for i in range(1,man_num+1)]
                         )
+    if diaosi:
+        women['level'+str(man_num+1)] = 'm'+str(man_num+1)
+        
     return (man, women)
 
 
@@ -41,7 +52,7 @@ def create_mapping_table(man,women):
     return (man_ismapping, women_ismapping)
 
 
-def calc_standard(man, woman, man_ismapping, women_ismapping):
+def calc_standard(man, women, man_ismapping, women_ismapping):
     level_num = 0
     print('==============================开始模拟求婚过程==============================')
     while man_ismapping['love_level'].min() == 0:
@@ -95,8 +106,7 @@ def calc_standard(man, woman, man_ismapping, women_ismapping):
                 pass
     print('==============================婚姻配对完成==============================')
     print('共进行了{}次牵线搭桥，在第{}天举办集体婚礼。'.format(level_num, level_num + 1))
-    return 
-    
+    return man_ismapping, women_ismapping
 
 
 if __name__ == '__main__':
@@ -104,3 +114,4 @@ if __name__ == '__main__':
     women_num = 100
     man, women = create_sample(man_num, women_num)
     man_ismapping, women_ismapping = create_mapping_table(man, women)
+    result = calc_standard(man, women, man_ismapping, women_ismapping)
