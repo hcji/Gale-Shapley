@@ -6,10 +6,12 @@ Created on Sat Mar  9 09:00:30 2019
 """
 
 import random
+import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 
-def create_sample(man_num, women_num, diaosi = True):
+def create_sample(man_num, women_num, diaosi = False):
     #设置男女生喜好样本
     if diaosi:
         women_num += 1
@@ -109,9 +111,38 @@ def calc_standard(man, women, man_ismapping, women_ismapping):
     return man_ismapping, women_ismapping
 
 
+def plot_ranks(man_ismapping, women_ismapping):
+    plt.figure(figsize=(6, 4))
+    plt.plot(range(len(man_ismapping)), man_ismapping['love_level'], 'bo', color='blue', alpha=0.5, label='man')
+    plt.plot(range(len(women_ismapping)), women_ismapping['love_level'], 'bo', color='red', alpha=0.5, label='woman')
+    plt.gca().invert_yaxis()
+    plt.ylabel('love level')
+    plt.legend(loc='lower right')
+    
+
+def calc_loop(man_num, women_num, loop=100, diaosi=False):
+    man_love_level = []
+    women_love_level = []
+    for i in range(loop):
+        man, women = create_sample(man_num, women_num, diaosi)
+        man_ismapping, women_ismapping = create_mapping_table(man, women)
+        man_ismapping, women_ismapping = calc_standard(man, women, man_ismapping, women_ismapping)
+        man_love_level.append(man_ismapping['love_level'])
+        women_love_level.append(women_ismapping['love_level'])
+    man_love_level = pd.DataFrame(man_love_level)
+    women_love_level = pd.DataFrame(women_love_level)
+    man_res = pd.DataFrame(man_love_level.mean(axis=0))
+    women_res = pd.DataFrame(women_love_level.mean(axis=0))
+    man_res.columns = ['love_level']
+    women_res.columns = ['love_level']
+    return man_res, women_res
+
+
 if __name__ == '__main__':
     man_num = 100
     women_num = 100
-    man, women = create_sample(man_num, women_num)
+    man, women = create_sample(man_num, women_num, diaosi=False)
     man_ismapping, women_ismapping = create_mapping_table(man, women)
-    result = calc_standard(man, women, man_ismapping, women_ismapping)
+    man_ismapping, women_ismapping = calc_standard(man, women, man_ismapping, women_ismapping)
+    
+    
